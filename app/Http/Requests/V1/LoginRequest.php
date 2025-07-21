@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Http\Requests\V1;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Http\FormRequest;
+
+class LoginRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'email' => 'required',
+            'password' => 'required'
+        ];
+    }
+
+
+    public function authenticate(): void
+    {
+        if (!Auth::attempt($this->only(['email', 'password']))) {
+            abort(403, 'Invalid email password');
+        }
+    }
+
+    public function generateUserToken()
+    {
+        $user = User::whereEmail($this->email)->latest()->first();
+
+        $token = $user->createToken('web')->plainTextToken;
+
+
+        return [
+            'user' => $user,
+            'token' => $token
+        ];
+    }
+}
