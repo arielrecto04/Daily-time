@@ -61,7 +61,7 @@ const quickActions = [
 
             <!-- Router View for Child Pages -->
             <main class="px-4 sm:px-6 lg:px-8">
-                <div class="bg-white shadow rounded-xl border border-gray-100 min-h-[400px] p-6">
+                <div class="bg-white shadow rounded-xl border border-gray-100 min-h-[400px] p-6 relative">
                     <router-view />
                 </div>
             </main>

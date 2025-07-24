@@ -15,3 +15,4 @@ export { default as PopOver } from "./PopOver.vue";
 export { default as LeaveTypeForm } from "./forms/LeaveTypeForm.vue";
 export { default as Toggle } from "./Toggle.vue";
 export { default as Card2 } from "./Card2.vue";
+export { default as QuillEditor } from "./QuillEditor.vue";

@@ -11,6 +11,8 @@ class LeaveApplication extends Model
         'descriptions',
         'total_days',
         'leave_type_id',
+        'start_date',
+        'end_date',
         'user_id'
     ];
 

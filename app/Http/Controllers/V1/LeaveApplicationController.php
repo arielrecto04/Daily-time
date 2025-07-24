@@ -15,7 +15,11 @@ class LeaveApplicationController extends Controller
      */
     public function index()
     {
-        return LeaveApplication::paginate(10);
+        return LeaveApplication::with([
+            'user',
+            'leaveType',
+            'attachments'
+        ])->paginate(10);
     }
 
     /**
@@ -31,8 +35,6 @@ class LeaveApplicationController extends Controller
      */
     public function store(LeaveApplicationStoreRequest $request)
     {
-
-        dd($request->all());
         return $request->store();
     }
 
@@ -41,7 +43,7 @@ class LeaveApplicationController extends Controller
      */
     public function show(string $id)
     {
-        return LeaveApplication::findOrFail($id);
+        return LeaveApplication::with(['attachments'])->findOrFail($id);
     }
 
     /**

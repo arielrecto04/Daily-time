@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+
+.editor-wrapper {
+  @apply w-full bg-white rounded-lg shadow-sm;
+}
+
+:deep(.ql-editor) {
+  min-height: 200px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+:deep(.ql-toolbar) {
+  @apply border-gray-200 rounded-t-lg;
+}
+
+:deep(.ql-container) {
+  @apply border-gray-200 rounded-b-lg;
+}
+
+
+.prose {
+  @apply text-gray-900 text-base leading-7;
+}

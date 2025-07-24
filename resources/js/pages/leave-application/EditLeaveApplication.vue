@@ -4,48 +4,42 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 import { PaperClipIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { _descriptors } from 'chart.js/helpers';
-import { QuillEditor } from '@/components';
-
+import { QuillEditor, Loader } from '@/components';
+import { useRoute } from 'vue-router';
 
 const leaveTypeStore = useLeaveTypeStore();
 const { leaveTypes } = storeToRefs(leaveTypeStore);
 const { user } = storeToRefs(useAuthStore());
 
+
+const route = useRoute();
+
 const usersStore = useUsersStore();
 const { users } = storeToRefs(usersStore);
 
 const leaveApplicationStore = useLeaveApplicationStore();
-const { isLoading, error } = storeToRefs(leaveApplicationStore);
+const { isLoading, error, leaveApplication } = storeToRefs(leaveApplicationStore);
 
-const leaveApplicationForm = ref({
-    name: '',
-    leave_type_id: '',
-    start_date: '',
-    end_date: null,
-    total_days: 0,
-    descriptions: '',
-    status: 'pending',
-    attachments: [],
-    user_id: user.value.id,
-})
+
 
 const isSubmitting = ref(false);
 
 onMounted(() => {
     leaveTypeStore.fetchLeaveTypes();
     usersStore.fetchUsers();
+    leaveApplicationStore.fetchLeaveApplication(route.params.id)
 })
 
 const handleFileChange = (event) => {
 
-    leaveApplicationForm.value.attachments.push(...event.target.files);
+    leaveApplication.value.attachments.push(...event.target.files);
 
 }
 
 const handleSubmit = async () => {
     try {
         isSubmitting.value = true;
-        await leaveApplicationStore.createLeaveApplication(leaveApplicationForm.value);
+        await leaveApplicationStore.updateLeaveApplication(route.params.id);
     } catch (error) {
         console.log(error);
     } finally {
@@ -54,32 +48,36 @@ const handleSubmit = async () => {
 }
 
 const removeAttachment = (index) => {
-    leaveApplicationForm.value.attachments.splice(index, 1);
+    leaveApplication.value.attachments.splice(index, 1);
 }
 
 
 const calculateTotalDays = () => {
-    const startDate = new Date(leaveApplicationForm.value.start_date);
-    const endDate = new Date(leaveApplicationForm.value.end_date);
-    if(!leaveApplicationForm.value.end_date || !leaveApplicationForm.value.start_date){
-        return;
-    }
 
-    const diffTime = Math.abs(endDate - startDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    leaveApplicationForm.value.total_days = diffDays;
+
+    // if(!leaveApplication.value) return;
+
+    // const startDate = new Date(leaveApplication.value.start_dae);
+    // const endDate = new Date(leaveApplication.value.end_date);
+    // if(!leaveApplication.value.end_date || !leaveApplication.value.start_date){
+    //     return;
+    // }
+
+    // const diffTime = Math.abs(endDate - startDate);
+    // const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    // leaveApplication.value?.total_days = diffDays;
 }
 
-watch(() => leaveApplicationForm.value.start_date, calculateTotalDays);
-watch(() => leaveApplicationForm.value.end_date, calculateTotalDays);
+watch(() => leaveApplication.value?.start_date, calculateTotalDays);
+watch(() => leaveApplication.value?.end_date, calculateTotalDays);
 
 
 const onchangeText = (event) => {
-    leaveApplicationForm.value.descriptions = event;
+    leaveApplication.value.descriptions = event;
 }
 
 const resetForm = () => {
-    leaveApplicationForm.value = {
+    leaveApplication.value = {
         leave_type_id: '',
         start_date: '',
         end_date: null,
@@ -91,30 +89,33 @@ const resetForm = () => {
     }
 }
 
+
+
 </script>
 
 <template>
     <div class="px-4 sm:px-6 lg:px-8 pt-10 pb-6">
         <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Create Leave Application</h1>
         <p class="mt-2 text-base text-gray-600">Create a new leave application to request time off from work.</p>
+        <Loader v-if="isLoading || !leaveApplication"></Loader>
 
-        <div class="p-6 sm:p-8 rounded-xl">
-            <form v-ref="leaveApplicationForm" @submit.prevent="handleSubmit" class="space-y-6"
+        <div v-else class="p-6 sm:p-8 rounded-xl">
+            <form v-ref="leaveApplication" @submit.prevent="handleSubmit" class="space-y-6"
                 enctype="multipart/form-data">
 
                 <!-- Leave Type & Dates -->
 
-                <h1 class="text-lg font-semibold text-gray-700">Total Days: {{ leaveApplicationForm.total_days }}</h1>
+                <h1 class="text-lg font-semibold text-gray-700">Total Days: {{ leaveApplication.total_days }}</h1>
 
                 <div class="flex flex-col gap-2">
                     <label for="" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                    <input type="text" id="" v-model="leaveApplicationForm.name" required
+                    <input type="text" id="" v-model="leaveApplication.name" required
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label for="leave_type" class="block text-sm font-medium text-gray-700 mb-1">Leave Type</label>
-                        <select id="leave_type" v-model="leaveApplicationForm.leave_type_id" required
+                        <select id="leave_type" v-model="leaveApplication.leave_type_id" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <option disabled value="">Select a type</option>
 
@@ -127,7 +128,7 @@ const resetForm = () => {
                     <div>
                         <label for="employee_id" class="block text-sm font-medium text-gray-700 mb-1">Employee
                             ID</label>
-                        <select id="employee_id" v-model="leaveApplicationForm.user_id" required
+                        <select id="employee_id" v-model="leaveApplication.user_id" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <option disabled value="">Select an employee</option>
 
@@ -145,12 +146,12 @@ const resetForm = () => {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                        <input type="date" id="start_date" v-model="leaveApplicationForm.start_date" required
+                        <input type="date" id="start_date" v-model="leaveApplication.start_date" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                        <input type="date" id="end_date" v-model="leaveApplicationForm.end_date" required
+                        <input type="date" id="end_date" v-model="leaveApplication.end_date" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
@@ -159,7 +160,7 @@ const resetForm = () => {
                 <div>
                     <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
 
-                    <QuillEditor v-model="leaveApplicationForm.descriptions" @editor-change="onchangeText"
+                    <QuillEditor v-model="leaveApplication.descriptions" @editor-change="onchangeText"
                         class="w-full bg-white rounded-lg shadow-sm" placeholder="Please provide a brief reason for your leave...">
                     </QuillEditor>
                     <!-- <textarea id="reason" rows="6" v-model="leaveApplicationForm.descriptions"
@@ -170,7 +171,7 @@ const resetForm = () => {
                 <!-- File Attachment -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Attachment (Optional)</label>
-                    <div v-if="!leaveApplicationForm.attachments.length"
+                    <div v-if="!leaveApplication?.attachments || !leaveApplication"
                         class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                         <div class="space-y-1 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
@@ -192,8 +193,8 @@ const resetForm = () => {
                         </div>
                     </div>
                     <!-- File Preview -->
-                    <template v-if="leaveApplicationForm.attachments.length > 0">
-                        <template v-for="attachment, index in leaveApplicationForm.attachments" :key="attachment.name">
+                    <template v-if="leaveApplication?.attachments?.length > 0">
+                        <template v-for="attachment, index in leaveApplication.attachments" :key="attachment.name">
                             <div class="mt-2 flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
 
                                 <div class="flex items-center truncate">

@@ -3,3 +3,4 @@ export { useAttendanceStore } from "./useAttendanceStore";
 export { useUsersStore } from "./useUsersStore";
 export { useDepartmentStore } from "./useDepartmentStore";
 export { useLeaveTypeStore } from "./useLeaveTypeStore";
+export { useLeaveApplicationStore } from "./useLeaveApplicationStore";

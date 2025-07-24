@@ -27,6 +27,8 @@ class LeaveApplicationUpdateRequest extends FormRequest
             'descriptions' => 'required',
             'total_days' => 'required',
             'leave_type_id' => 'required',
+            'end_date' => 'required',
+            'start_date' => 'required',
             'user_id' => 'required',
         ];
     }
@@ -34,6 +36,10 @@ class LeaveApplicationUpdateRequest extends FormRequest
     public function update($id)
     {
         $leaveApplication = LeaveApplication::findOrFail($id);
-        return $leaveApplication->update($this->validated());
+
+        $leaveApplication->update($this->validated());
+
+
+        return $leaveApplication->refresh();
     }
 }

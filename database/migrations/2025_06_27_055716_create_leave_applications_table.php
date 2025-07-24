@@ -17,7 +17,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->longText('descriptions')->nullable();
+            $table->date('start_date');
+            $table->date('end_date');
             $table->integer('total_days');
+            $table->string('status')->default('pending');
             $table->foreignIdFor(LeaveType::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
             $table->timestamps();

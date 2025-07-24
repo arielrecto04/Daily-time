@@ -27,6 +27,8 @@ class LeaveApplicationStoreRequest extends FormRequest
             'descriptions' => 'required',
             'total_days' => 'nullable',
             'leave_type_id' => 'required',
+            'start_date' => 'required',
+            'end_date' => 'required',
             'user_id' => 'required',
             'attachments' => 'required',
         ];

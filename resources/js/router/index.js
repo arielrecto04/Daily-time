@@ -63,6 +63,24 @@ const routes = [
                         "@/pages/leave-application/CreateLeaveApplication.vue"
                     ),
             },
+            {
+                path: "show/:id",
+                name: "leave-application-show",
+                meta: { requiresAuth: true, title: "Leave Application Show" },
+                component: () =>
+                    import(
+                        "@/pages/leave-application/ShowLeaveApplication.vue"
+                    ),
+            },
+            {
+                path: "edit/:id",
+                name: "leave-application-edit",
+                meta: { requiresAuth: true, title: "Leave Application Show" },
+                component: () =>
+                    import(
+                        "@/pages/leave-application/EditLeaveApplication.vue"
+                    ),
+            }
         ],
     },
     {
