@@ -35,13 +35,13 @@ export const useLeaveApplicationStore = defineStore('leaveApplication', {
             try {
                 const response = await axios.get('/leave-applications');
                 this._leaveApplications = response.data.data;
-                this._pagination = response.data.pagination = {
-                    total: response.data.pagination.total,
-                    per_page: response.data.pagination.per_page,
-                    current_page: response.data.pagination.current_page,
-                    last_page: response.data.pagination.last_page,
-                    from: response.data.pagination.from,
-                    to: response.data.pagination.to,
+                this._pagination =  {
+                    total: response.data.total,
+                    per_page: response.data.per_page,
+                    current_page: response.data.current_page,
+                    last_page: response.data.last_page,
+                    from: response.data.from,
+                    to: response.data.to,
                 };
             } catch (error) {
                 console.error('Error fetching leave applications:', error);
@@ -99,6 +99,21 @@ export const useLeaveApplicationStore = defineStore('leaveApplication', {
                 console.error('Error fetching leave application:', error);
             } finally {
                 this._isLoading = false;
+            }
+        },
+        async deleteLeaveApplication(){
+            try {
+
+                const response = await axios.delete(`/leave-applications/${this._leaveApplication.id}`);
+
+                this._leaveApplications = this._leaveApplications.filter((leaveApplication) => leaveApplication.id != this._leaveApplication.id);
+
+                this._leaveApplication = null;
+
+            } catch (error) {
+                console.log(error)
+            } finally {
+
             }
         }
     },

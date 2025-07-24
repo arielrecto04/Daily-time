@@ -1,9 +1,9 @@
 <script setup>
-import { Table, Button, Loader } from "@/components";
+import { Table, Button, Loader, Modal } from "@/components";
 import { PencilIcon, TrashIcon, EyeIcon } from "@heroicons/vue/24/outline";
 import { useLeaveApplicationStore } from "@/stores/useLeaveApplicationStore";
 import { storeToRefs } from "pinia";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 const leaveApplicationStore = useLeaveApplicationStore();
 const { leaveApplications, isLoading } = storeToRefs(leaveApplicationStore);
 
@@ -15,13 +15,23 @@ const columns = [
     { label: "Status", key: "status" },
 ];
 
-const handleEdit = (row) => {
-    console.log(row);
+const isDeleteModalOpen = ref(false);
+
+const handleDeleteModalAction = (row) => {
+    isDeleteModalOpen.value = !isDeleteModalOpen.value;
+    leaveApplicationStore.selectLeaveApplication(row);
 };
 
-const handleDelete = (row) => {
-    console.log(row);
-};
+
+
+const deleteDataHandle = async () => {
+    try {
+        await leaveApplicationStore.deleteLeaveApplication()
+        isDeleteModalOpen.value = false;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 onMounted(() => {
     leaveApplicationStore.fetchLeaveApplications();
@@ -44,9 +54,32 @@ onMounted(() => {
                 </Button>
             </router-link>
 
-            <Button @click="handleDelete(row)" variant="danger">
+            <Button @click="handleDeleteModalAction(row)" variant="danger">
                 <TrashIcon class="w-5 h-5" />
             </Button>
         </template>
     </Table>
+
+    <Modal :isOpen="isDeleteModalOpen">
+        <template #header> Delete </template>
+
+        <template #body> Are you sure to delete the Data ? </template>
+
+        <template #footer>
+            <button
+                @click="handleDeleteModalAction"
+                type="button"
+                class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+            >
+                Cancel
+            </button>
+            <button
+                @click="deleteDataHandle"
+                type="button"
+                class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+            >
+                Delete
+            </button>
+        </template>
+    </Modal>
 </template>
